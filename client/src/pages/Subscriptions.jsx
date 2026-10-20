@@ -1,0 +1,7 @@
+import { useEffect, useState } from "react";
+import api from "../services/api.js";
+export default function Subscriptions() {
+ const [subs,setSubs]=useState([]); const [plans,setPlans]=useState([]); const [error,setError]=useState("");
+ useEffect(()=>{Promise.all([api.get("/subscriptions/me"),api.get("/subscriptions/plans")]).then(([s,p])=>{setSubs(s.data.subscriptions);setPlans(p.data.plans);}).catch(()=>setError("Could not load subscription data."));},[]);
+ return <main><p className="eyebrow">ACCOUNT</p><h1>Subscriptions</h1><p className="muted">Demo subscription records only. No payments are taken.</p>{error&&<p className="error">{error}</p>}<section className="grid">{subs.map(s=><article className="panel" key={s._id}><span className="status active">{s.status}</span><h2>{s.plan?.name}</h2><p className="price">₹{s.plan?.price}<small> / {s.plan?.interval}</small></p><p>{s.plan?.description}</p><p className="muted">Renewal date: {new Date(s.renewalDate).toLocaleDateString()}</p><ul>{s.plan?.features?.map(f=><li key={f}>{f}</li>)}</ul></article>)}</section><h2>Available demo plans</h2><section className="grid">{plans.map(p=><article className="panel" key={p._id}><h3>{p.name}</h3><p className="price">₹{p.price}<small> / {p.interval}</small></p><p>{p.description}</p><ul>{p.features.map(f=><li key={f}>{f}</li>)}</ul><p className="hint">Demo only — plan changes are not enabled.</p></article>)}</section></main>;
+}
